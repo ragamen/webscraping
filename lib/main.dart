@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/dom.dart' as dom;
@@ -51,8 +52,16 @@ class _MyHomePageState extends State<MyHomePage> {
           itemCount: articulos.length,
           itemBuilder: (context, index) {
             final articulo = articulos[index];
-            return ListTile(
-              title: Text(articulo.title),
+            var xHora =  articulo.hora.substring(0,4);
+            var xOper =  articulo.hora.substring(5,articulo.hora.length); 
+            return Expanded(
+              child: ListTile(
+                leading: Image.network('https://lotoven.com/${articulo.urlimage}',height: 100,width: 100,),
+                title: Text(articulo.nombre,
+                style:const TextStyle(fontSize: 26)),
+                subtitle:  Text(
+                  '${articulo.numero} Hora:${articulo.hora}',style:const TextStyle(fontSize: 16)),
+              ),
             );
           },
         ));
@@ -60,19 +69,47 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future getWebSiteData() async {
 //    final url = Uri.parse('https://www.amazon.com/s?k=iphone');
+  
     final url = Uri.parse(
-        'https://psicologiaymente.com/reflexiones/frases-motivadoras');
+        'https://lotoven.com/animalitos/');
+   try {
     final response = await http.get(url);
     dom.Document html = dom.Document.html(response.body);
-// #article-content-container > h3:nth-child(306)
-//       .querySelectorAll('h2 > a > span')
-    final titles = html
-        .querySelectorAll('> h3')
+    final numero = html
+        .querySelectorAll('h4 > small')
         .map((element) => element.innerHtml.trim())
         .toList();
+    final nombre = html
+        .querySelectorAll(' > span.info')
+        .map((element) => element.innerHtml.trim())
+        .toList();
+    final hora = html
+        .querySelectorAll(' div > span.info2')
+        .map((element) => element.innerHtml.trim())
+        .toList();
+
+    final urlimage = html
+        .querySelectorAll(' > div > div > img')
+        .map((element) => element.attributes['src']!)
+        .toList();
+    urlimage.remove('/assets/images/investment/thumb-min.webp');
+    print (urlimage.length);
     setState(() {
-      articulos = List.generate(titles.length,
-          (index) => Articulos(url: '', title: titles[index], urlimage: ''));
+      articulos = List.generate(nombre.length,
+          (index) => Articulos(numero:'',
+           urlimage: urlimage[index],
+           nombre: nombre[index],
+           hora:hora[index],));
     });
+
+   }catch (e){
+    if (kDebugMode) {
+      // ignore: prefer_interpolation_to_compose_strings
+      print('{eeee$e}');
+    }
+   }
+
+// #article-content-container > h3:nth-child(306)
+//       .querySelectorAll('h2 > a > span')
   }
 }

@@ -1,7 +1,8 @@
 class Articulos {
-  final String url;
-  final String title;
+  final String numero;
   final String urlimage;
+  final String nombre;
+  final String hora;
   const Articulos(
-      {required this.url, required this.title, required this.urlimage});
+      { required this.numero, required this.urlimage,required this.nombre,required this.hora,});
 }
